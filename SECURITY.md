@@ -4,7 +4,8 @@
 
 Please do not open a public issue for a vulnerability that could lead to
 unexpected code execution, path traversal, arbitrary file overwrite, update
-substitution or loss of managed versions. Use GitHub's private vulnerability
+substitution, unsafe script execution, sensitive local-data disclosure or loss
+of managed versions. Use GitHub's private vulnerability
 reporting for this repository when enabled. If it is unavailable, contact the
 maintainer privately through the contact method on the owner's GitHub profile.
 
@@ -17,7 +18,10 @@ Blazelauncher manages executable content. Its safety contract includes:
 - user-level XDG mutations only;
 - explicit test launches and network/update consent;
 - staged, verified and reversible file changes;
-- redaction of environment values from logs and diagnostics.
+- redaction of environment values from logs and diagnostics;
+- no default logging of palette queries, clipboard data, browser history,
+  Obsidian contents, SSH destinations or script output;
+- local script manifests only, with exact argv/risk preview and bounded output.
 
 Only the latest tagged release is expected to receive security fixes before a
 stable maintenance policy is announced.
