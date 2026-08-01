@@ -10,6 +10,15 @@ risk and rich previews.
 The first complete palette milestone has exactly 15 built-in actions. New ideas
 wait until these are useful, fast, private and well tested.
 
+## Presentation surface
+
+Everything below assumes an overlay that appears centred on the active output,
+takes keyboard focus and dismisses on Escape. On Wayland that is not something
+a client can simply do, and how Blazelauncher achieves it is an open question —
+see decision record 0004, which must be accepted before this specification can
+be implemented. The performance targets at the end of this document may need to
+be restated as compositor-dependent once it is answered.
+
 ## Interaction model
 
 The palette opens as a compact, keyboard-first Kirigami overlay with:

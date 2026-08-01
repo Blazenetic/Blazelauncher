@@ -1,0 +1,16 @@
+# Every pull request is reviewed by the maintainer.
+*       @Blazenetic
+
+# The verification harness grades every other change in the repository. It is
+# owned by a human on purpose: a contributor should not be able to relax the
+# checks that judge their own work in the same pull request.
+/scripts/                   @Blazenetic
+/.github/workflows/         @Blazenetic
+/ruff.toml                  @Blazenetic
+/mypy.ini                   @Blazenetic
+/pytest.ini                 @Blazenetic
+/.importlinter              @Blazenetic
+/tests/architecture/        @Blazenetic
+/tests/conftest.py          @Blazenetic
+/AGENTS.md                  @Blazenetic
+/docs/decisions/            @Blazenetic

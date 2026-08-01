@@ -8,7 +8,8 @@ building every backend layer; deliver thin vertical slices that remain usable.
 **Outcome:** a contributor can clone, run checks and launch a minimal native
 window and CLI from one documented environment.
 
-- create the Python package, task runner and development bootstrap;
+- create the Python package and make the existing verification harness light up
+  the checks that currently report SKIP;
 - establish domain/application/infrastructure/UI boundaries;
 - establish the minimal Qt-free action/provider contracts used by every
   product surface;
@@ -58,6 +59,11 @@ modelled safely; advanced fields remain understandable.
 
 **Outcome:** a keyboard shortcut opens a fast native palette that queries safe
 fixture providers, ranks and previews results, and executes one shared action.
+
+**Gate:** decision record 0004 must be accepted first. How a borderless overlay
+positions and focuses itself on Wayland is unproven, and it determines whether
+this phase is a Python-only piece of work. Run that spike during Phase 0 or 1
+so the answer is ready, not during Phase 3 where it blocks.
 
 - query/result/payload/preview/execution provider contracts;
 - cancellable search broker with deterministic ranking and budgets;

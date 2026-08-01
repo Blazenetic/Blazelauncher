@@ -61,7 +61,13 @@ changed-manifest behaviour should therefore remain conservative.
 
 ## Template values
 
-V1 permits complete-token or safely substituted values only:
+A placeholder must be the **entire** argv element. `"{query}"` is valid;
+`"--input={query}"`, `"prefix{query}"` and any other partial substitution are
+validation errors. Concatenating user input into a larger token is how argument
+injection starts, and "safely substituted" is too vague a rule to implement
+consistently.
+
+V1 permits these complete tokens:
 
 - `{query}` — current palette query after the action is selected;
 - `{clipboard}` — current text clipboard, only when input declares it;
@@ -106,6 +112,13 @@ Script actions cannot:
 - Validate placeholder/input compatibility and confirmation/risk combinations.
 - Store a manifest content hash. A changed manifest loses any remembered first-
   run trust/confirmation acknowledgement.
+- Known limitation: the hash covers the manifest, not the executable it points
+  at. A `pure` action with `confirmation = "never"` keeps its acknowledgement
+  even if the target script is rewritten afterwards. Hashing the target on
+  every invocation is not free and would still lose to anything the script
+  itself calls, so v1 accepts this and says so rather than implying a guarantee
+  it cannot make. Manifests are user-authored local files; treat the directory
+  as trusted input the same way `~/.local/bin` is.
 - Duplicate IDs are errors with both source paths reported.
 - `blazelauncher action validate <manifest>` and `doctor` expose actionable
   diagnostics without executing the command.

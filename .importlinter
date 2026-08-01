@@ -1,0 +1,52 @@
+# Import contracts.
+#
+# These encode the dependency rules in AGENTS.md and docs/ARCHITECTURE.md so
+# that a violation fails the build instead of relying on review to catch it.
+# Run with: lint-imports
+
+[importlinter]
+root_package = blazelauncher
+include_external_packages = True
+
+[importlinter:contract:layers]
+name = Dependencies point inward
+type = layers
+layers =
+    blazelauncher.cli : blazelauncher.gui
+    blazelauncher.adapters
+    blazelauncher.providers
+    blazelauncher.infrastructure
+    blazelauncher.application
+    blazelauncher.domain
+
+[importlinter:contract:domain-purity]
+name = The domain has no Qt, process, network or database imports
+type = forbidden
+source_modules =
+    blazelauncher.domain
+forbidden_modules =
+    PySide6
+    subprocess
+    sqlite3
+    socket
+    http
+    urllib
+    asyncio
+
+[importlinter:contract:application-is-qt-free]
+name = Application services are Qt-free
+type = forbidden
+source_modules =
+    blazelauncher.application
+forbidden_modules =
+    PySide6
+
+# The clipboard provider needs a Qt clipboard. It must reach it through an
+# adapter port rather than importing Qt into the provider itself.
+[importlinter:contract:providers-are-qt-free]
+name = Provider contracts and built-ins are Qt-free
+type = forbidden
+source_modules =
+    blazelauncher.providers
+forbidden_modules =
+    PySide6

@@ -13,17 +13,21 @@ modular and pleasant to extend after MVP+.
 
 Before changing code or plans, read:
 
-1. `README.md`
-2. `docs/PRODUCT.md`
-3. `docs/ARCHITECTURE.md`
-4. `docs/PALETTE.md` for palette/provider work
-5. `docs/SCRIPT-ACTIONS.md` for script action work
-6. `docs/ROADMAP.md`
-7. every decision record relevant to the task
-8. the linked GitHub issue and current branch/PR context
+1. `docs/STATUS.md` — what is actually true in the repository right now
+2. `README.md`
+3. `docs/PRODUCT.md`
+4. `docs/ARCHITECTURE.md`
+5. `docs/PALETTE.md` for palette/provider work
+6. `docs/SCRIPT-ACTIONS.md` for script action work
+7. `docs/ROADMAP.md`
+8. every decision record relevant to the task
+9. the linked GitHub issue and current branch/PR context
 
-For the initial autonomous build, also read
-`docs/AGENT-MVP-BUILD-PROMPT.md` in full.
+`docs/AGENT-PROMPT.md` holds the prompt templates used to start this work.
+
+Documents describe intent. `docs/STATUS.md` describes reality, and where they
+disagree, reality wins — say so in the pull request rather than implementing
+around it.
 
 ## Non-negotiable product boundaries
 
@@ -52,6 +56,16 @@ For the initial autonomous build, also read
 - Preserve unknown `X-*` desktop-entry keys when adopting existing launchers.
 - Do not overwrite non-Blazelauncher files without a visible backup and user
   confirmation.
+
+Some of these are enforced mechanically. `tests/architecture/` fails the build
+when Qt reaches a Qt-free layer, when a command would go through a shell, when
+a subprocess is launched outside the process layers, or when a user directory
+is hardcoded past the XDG resolver. Those guards are self-tested against
+synthetic sources, so they work before the package exists.
+
+The rest — side-effect-free search and preview, not logging sensitive data,
+staged and reversible writes — are reviewed by a human. A green suite is not
+evidence that they hold.
 
 ## Chosen stack
 
@@ -93,27 +107,66 @@ and domain contracts. Domain code must not import Qt.
 - Link the PR to its issue and use `Closes #N` only when acceptance criteria are
   actually met.
 - Prefer small vertical slices over broad layer-first rewrites.
-- Keep implementation status in issues/PRs, not copied into this file.
+- Keep implementation status in issues/PRs and in `docs/STATUS.md`, not copied
+  into this file. `docs/STATUS.md` is the one place that carries context
+  between contributors who share no memory, so update it in the same change.
 - Record an ADR when changing a boundary, data model, security posture or
   primary technology.
+- Write British English in documentation and user-facing strings, matching the
+  existing docs ("licence", "behaviour", "organise").
 
 ## Verification contract
 
-Until the task runner exists, use the equivalent direct commands. The project
-should converge on these stable checks:
-
 ```bash
-python -m pytest
-ruff check .
-ruff format --check .
-mypy src
-desktop-file-validate <generated-fixture.desktop>
-qmllint src/blazelauncher/qml
-appstreamcli validate org.blazenetic.Blazelauncher.metainfo.xml
+scripts/bootstrap-dev.sh   # once: system packages, then .venv
+scripts/verify.sh          # the contract
 ```
 
-Tests that mutate XDG data must point `XDG_CONFIG_HOME`, `XDG_DATA_HOME`,
-`XDG_STATE_HOME` and `XDG_CACHE_HOME` at temporary directories. Never test
+`scripts/verify.sh` is the definition of "the checks pass". CI runs it, the
+`justfile` wraps it, and pull requests are reviewed against its output. Do not
+invent a parallel set of commands, and do not add a check that only exists in
+CI — put it in the script.
+
+It runs `ruff format --check`, `ruff check`, `shellcheck`, `mypy`,
+import-linter contracts, pytest, offscreen Qt tests, `qmllint`,
+`desktop-file-validate` and `appstreamcli validate`.
+
+### Verification tiers
+
+- **core** — Python only. Runs on any Linux with Python 3.12 and
+  `requirements-dev.txt`, including agent containers and the main CI job.
+- **desktop** — Qt, QML, Kirigami, desktop-entry and AppStream validation.
+  Needs distribution packages. Kirigami 6 is not installable from PyPI, so QML
+  importing `org.kde.kirigami` can only be checked on Arch/CachyOS or in the
+  Arch container job in CI.
+
+A check whose subject does not exist yet reports SKIP; so does a check whose
+tooling is missing. CI passes `--strict`, where missing tooling is a failure.
+**A SKIP is not a pass** — if an acceptance criterion depends on a check that
+skipped in your environment, say so rather than implying it passed.
+
+Qt tests are marked `gui` and run under `QT_QPA_PLATFORM=offscreen`. Tests
+needing Kirigami are marked `kirigami` and are desktop tier only. Never run the
+suite against a live session; a stray window on someone's desktop is a bug in
+the test.
+
+### Tool configuration
+
+`ruff.toml`, `mypy.ini`, `pytest.ini` and `.importlinter` live at the
+repository root. Each takes precedence over `pyproject.toml`, so do not
+duplicate these settings there — the copy in `pyproject.toml` would be ignored
+without any warning.
+
+The harness is owned by the maintainer. Relaxing a rule, a guard test or a CI
+job in the same change that the rule would have caught is a review failure.
+Raise it in the pull request and leave the check failing.
+
+### Test data
+
+Tests that touch XDG data must point `XDG_CONFIG_HOME`, `XDG_DATA_HOME`,
+`XDG_STATE_HOME` and `XDG_CACHE_HOME` at temporary directories. The autouse
+`xdg` fixture in `tests/conftest.py` does this for every test, including `HOME`,
+and fails a test that points any of them back at the real user. Never test
 against a contributor's real application menu or AppImage directory.
 
 Provider tests must use fixtures or disposable copies, never real browser
@@ -123,6 +176,24 @@ or task files. Performance claims require measurements with stated conditions.
 ## Definition of done
 
 A change is done when behaviour, tests, documentation and error handling agree;
-the relevant checks pass; unsafe operations are gated; and the PR contains a
-compact handover with evidence, decisions, remaining risks and the exact next
-action.
+the relevant checks pass; unsafe operations are gated; `docs/STATUS.md` matches
+reality; and the PR contains a compact handover with evidence, decisions,
+remaining risks and the exact next action.
+
+## Evidence
+
+Separate three things in every pull request, and never blur them:
+
+- **checked** — you ran a command and its output is in the PR;
+- **not checked** — nothing verified this, and you say so;
+- **cannot be checked here** — it needs the real desktop.
+
+Several acceptance criteria in this project genuinely cannot be verified
+outside a KDE Plasma 6 Wayland session: whether a launcher appears in the
+application menu, how QML renders, anything involving the compositor, and every
+performance target. Name those plainly and leave them for the maintainer.
+
+Performance claims need measurements with stated hardware, data size, sample
+count and cold or warm state. A number without conditions is not evidence, and
+a number produced by a harness you wrote in the same change is weak evidence —
+say which it is.
