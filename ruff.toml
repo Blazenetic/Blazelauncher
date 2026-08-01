@@ -1,0 +1,54 @@
+# Lint and format configuration.
+#
+# This file is deliberately at the repository root rather than inside
+# pyproject.toml: it is part of the verification harness that grades changes,
+# and Ruff gives a standalone ruff.toml precedence over pyproject.toml. Do not
+# duplicate these settings into pyproject.toml.
+
+target-version = "py312"
+line-length = 88
+src = ["src", "tests"]
+
+[lint]
+select = [
+    "F",    # pyflakes
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "I",    # import sorting
+    "N",    # naming
+    "UP",   # pyupgrade
+    "B",    # bugbear
+    "A",    # builtin shadowing
+    "C4",   # comprehensions
+    "S",    # bandit: the shell/subprocess rules are a product safety boundary
+    "PTH",  # prefer pathlib over os.path
+    "SIM",  # simplification
+    "TID",  # tidy imports (banned APIs below)
+    "RUF",
+]
+ignore = [
+    "S603",  # subprocess call without shell: this is the required style here
+]
+
+[lint.flake8-tidy-imports]
+ban-relative-imports = "parents"
+
+# These are not style preferences. Every entry below is a documented product
+# boundary in AGENTS.md; banning the API is cheaper than catching it in review.
+[lint.flake8-tidy-imports.banned-api]
+"os.system".msg = "Use the structured subprocess runner with shell=False."
+"os.popen".msg = "Use the structured subprocess runner with shell=False."
+"subprocess.getoutput".msg = "Shells out implicitly. Use the subprocess runner."
+"subprocess.getstatusoutput".msg = "Shells out implicitly. Use the subprocess runner."
+
+[lint.per-file-ignores]
+"tests/**" = [
+    "S101",  # assert is the point
+    "S108",  # hardcoded temp paths appear in fixtures
+]
+
+[lint.isort]
+known-first-party = ["blazelauncher"]
+
+[format]
+docstring-code-format = true

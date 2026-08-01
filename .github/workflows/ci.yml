@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Everything that works on any Linux with Python 3.12. This is the job that
+  # gates most pull requests, so it stays fast.
+  core:
+    name: Core (format, lint, types, contracts, unit tests)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      # PySide6 installs from PyPI but needs the platform libraries at import
+      # time, even for offscreen rendering.
+      - name: Install Qt runtime libraries
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libegl1 libgl1 libxkbcommon0 libdbus-1-3 libfontconfig1
+
+      - name: Install the verification toolchain
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+          if [ -f pyproject.toml ]; then python -m pip install -e .; fi
+
+      # --strict turns "tooling missing" into a failure, so the job cannot go
+      # green by quietly skipping half of the contract.
+      - name: Verify
+        run: scripts/verify.sh --tier core --strict
+
+  # Kirigami 6, qmllint and the freedesktop validators are distribution
+  # packages. Arch is the primary packaging target, so the desktop tier is
+  # checked there rather than approximated elsewhere.
+  desktop:
+    name: Desktop (Qt, QML, desktop entry, AppStream)
+    runs-on: ubuntu-24.04
+    container: archlinux:latest
+    steps:
+      - name: Install packages
+        run: |
+          pacman -Syu --noconfirm --needed \
+            git \
+            python \
+            python-pip \
+            python-pyside6 \
+            kirigami \
+            qt6-declarative \
+            qt6-wayland \
+            desktop-file-utils \
+            appstream
+
+      - uses: actions/checkout@v4
+
+      - name: Install the verification toolchain
+        run: |
+          python -m venv --system-site-packages .venv
+          .venv/bin/python -m pip install --upgrade pip
+          # PySide6 comes from pacman here; installing it again from PyPI would
+          # shadow the distribution build that Kirigami is compiled against.
+          .venv/bin/python -m pip install \
+            $(grep -vE '^(PySide6|#|$)' requirements-dev.txt)
+          if [ -f pyproject.toml ]; then .venv/bin/python -m pip install -e .; fi
+
+      - name: Verify
+        run: |
+          . .venv/bin/activate
+          scripts/verify.sh --tier desktop --strict

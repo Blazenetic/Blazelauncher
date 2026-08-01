@@ -22,11 +22,26 @@ Closes #
 
 ## Evidence
 
-- [ ] Tests
-- [ ] Ruff format/check
-- [ ] Mypy
-- [ ] Desktop/AppStream/QML validation as relevant
-- [ ] Manual GUI smoke test as relevant
+Paste the `scripts/verify.sh` summary:
+
+```text
+
+```
+
+- [ ] `scripts/verify.sh` passes, and any SKIP is explained below
+- [ ] `docs/STATUS.md` updated
+- [ ] The verification harness was not weakened to make this pass
+
+### Not verified here
+
+<!--
+List anything you could not check, and why. Acceptance criteria needing a KDE
+Plasma 6 Wayland session — the application menu, QML rendering, compositor
+behaviour, every performance target — belong here rather than ticked above.
+"Not verified" is a normal outcome. A wrong claim is not.
+-->
+
+- 
 
 ## Handover
 

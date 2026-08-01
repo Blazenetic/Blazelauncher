@@ -161,6 +161,15 @@ a KRunner plugin: KDE's documented runner extension path is C++-centred, while
 Blazelauncher's Python action engine and richer preview/composition model should
 first be proven without a second implementation stack.
 
+**How that overlay reaches the screen is not yet decided.** Under Wayland a
+client cannot position its own window over the active output, and generally
+cannot raise or focus itself on demand — a launcher overlay wants all three.
+The usual answer is the layer-shell protocol, which KDE exposes through the C++
+`LayerShellQt` library and uses for KRunner itself; it has no Python bindings.
+See decision record 0004. The spike behind it must be accepted before Phase 3
+starts, because every palette issue assumes an overlay that appears instantly,
+centred, focused and dismissible.
+
 Invocation modes:
 
 1. `blazelauncher palette --toggle` cold-starts the application when it is not
@@ -211,7 +220,7 @@ $XDG_CONFIG_HOME/blazelauncher/actions/*.toml
 $XDG_DATA_HOME/blazelauncher/cabinet/<app-id>/<version>/<file>.AppImage
 $XDG_DATA_HOME/blazelauncher/icons/<managed icons>
 $XDG_DATA_HOME/blazelauncher/backups/<transaction-id>/...
-$XDG_DATA_HOME/applications/org.blazenetic.Blazelauncher.<id>.desktop
+$XDG_DATA_HOME/applications/io.github.blazenetic.Blazelauncher.<id>.desktop
 $XDG_STATE_HOME/blazelauncher/state.sqlite3
 $XDG_CACHE_HOME/blazelauncher/<derived metadata>
 ```
@@ -219,6 +228,18 @@ $XDG_CACHE_HOME/blazelauncher/<derived metadata>
 Database migrations must be monotonic and covered by upgrade tests. Backups
 should include a small manifest containing original path, hash, operation and
 timestamp.
+
+### Application identifier
+
+The reverse-DNS identifier is `io.github.blazenetic.Blazelauncher`. It is used
+for the desktop entry, the AppStream metadata, managed icon names and any
+future local socket path.
+
+The `io.github.` prefix is the convention for a project whose canonical home is
+a GitHub repository rather than a domain the maintainer controls, and Flathub
+requires it for such projects. Changing this identifier later means renaming
+installed files on users' machines, so it is fixed now while nothing has
+shipped.
 
 ## Desktop-entry model
 
