@@ -1,0 +1,40 @@
+name: Feature request
+description: Propose a focused launcher or AppImage workflow improvement
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: What recurring launcher or AppImage problem should be easier?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe success without prescribing unnecessary implementation.
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Primary surface
+      options:
+        - Launcher Studio
+        - AppImage Cabinet
+        - CLI or automation
+        - KDE/Plasma integration
+        - Packaging or contributor experience
+    validations:
+      required: true
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Scope boundary
+      description: What should this deliberately not become?
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Suggested acceptance criteria
