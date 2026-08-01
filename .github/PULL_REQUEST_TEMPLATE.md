@@ -16,6 +16,9 @@ Closes #
 - [ ] File mutations are previewed/atomic/recoverable as applicable
 - [ ] Network behaviour remains explicit and opt-in
 - [ ] KDE-specific behaviour stays behind an adapter
+- [ ] Queries, clipboard, history, notes, SSH data and script output are not
+      logged or exposed unexpectedly
+- [ ] Action risk, inputs, outputs and side effects are declared and previewed
 
 ## Evidence
 

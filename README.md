@@ -1,8 +1,11 @@
 # Blazelauncher
 
-Build launchers. Keep AppImages. Stay in control.
+Build launchers. Run actions. Keep AppImages. Stay in control.
 
-Blazelauncher is a focused, local-first Linux desktop utility combining:
+Blazelauncher is a focused, local-first Linux command surface combining:
+
+- **Command Palette** — search, preview, execute and compose high-value local
+  actions for developer and workstation workflows.
 
 - **Launcher Studio** — create, validate, test, back up and manage freedesktop
   `.desktop` launchers without hand-editing them.
@@ -24,36 +27,43 @@ Start here:
 
 1. [Product brief](docs/PRODUCT.md)
 2. [Architecture](docs/ARCHITECTURE.md)
-3. [MVP+ roadmap](docs/ROADMAP.md)
-4. [AI agent build prompt](docs/AGENT-MVP-BUILD-PROMPT.md)
-5. [Contributor and agent contract](AGENTS.md)
+3. [Command Palette specification](docs/PALETTE.md)
+4. [Script action manifest](docs/SCRIPT-ACTIONS.md)
+5. [MVP+ roadmap](docs/ROADMAP.md)
+6. [AI agent build prompt](docs/AGENT-MVP-BUILD-PROMPT.md)
+7. [Contributor and agent contract](AGENTS.md)
 
 ## Product shape
 
 ```text
-Native KDE GUI (PySide6 + QML/Kirigami)
-                 |
-Versioned application services
-                 |
-Desktop-entry | AppImage | backup | update adapters
-                 |
-       XDG user directories and local files
-                 |
-     blazelauncher CLI (--json available)
+Command Palette | Launcher Studio | AppImage Cabinet | CLI
+                             |
+                  Shared action services
+                             |
+ Provider search | desktop-entry | AppImage | safety adapters
+                             |
+           XDG user directories and local sources
 ```
 
-The GUI and CLI are peers over the same application services. Business rules
-must not live in QML or CLI handlers.
+Every surface is a peer over the same action and application services. Business
+rules must not live in QML or CLI handlers.
 
 ## MVP+ boundary
 
-Blazelauncher will manage user-owned launchers and a managed AppImage cabinet.
-It may generate launchers for scripts, local web apps, developer servers,
-terminal tools, Flatpaks, browser profiles and system commands. It will **not**
-manage pacman, paru, Flatpak repositories or system packages.
+Blazelauncher will run local actions, manage user-owned launchers and maintain a
+managed AppImage cabinet. It may generate launchers for scripts, local web apps,
+developer servers, terminal tools, Flatpaks, browser profiles and system
+commands. It will **not** manage pacman, paru, Flatpak repositories or system
+packages.
 
-No root daemon, privileged helper, background telemetry or mandatory account is
-part of the design. Network update checks are explicit and opt-in.
+The palette does not try to replace KRunner's ordinary application launching.
+Its differentiation is developer workflows, composable typed actions and rich
+previews. MVP+ ships 15 built-in actions and a constrained local script
+manifest—no extension marketplace.
+
+No privileged/system daemon, background telemetry or mandatory account is part
+of the design. Network activity is explicit and opt-in. A user may optionally
+keep the palette UI resident for fast toggling through local-only IPC.
 
 ## Intended installation targets
 

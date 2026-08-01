@@ -8,7 +8,8 @@ change.
 
 ## Principles
 
-- Keep Blazelauncher focused on launchers and AppImage lifecycle management.
+- Keep Blazelauncher focused on local actions, launchers and AppImage lifecycle
+  management—not package management or a general automation platform.
 - Prefer a small vertical slice that users can exercise.
 - Add tests around file/process behaviour and use temporary XDG directories.
 - Explain new production dependencies and security-relevant choices.

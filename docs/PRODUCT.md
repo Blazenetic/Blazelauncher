@@ -2,9 +2,10 @@
 
 ## Vision
 
-Blazelauncher makes locally managed Linux applications feel intentional. It
-gives power users a polished place to create launchers and care for AppImages,
-while retaining transparent files, standards and CLI control underneath.
+Blazelauncher makes a Linux workstation's useful actions feel intentional. It
+gives power users one polished command surface for executing developer
+workflows, creating launchers and caring for AppImages, while retaining
+transparent files, standards and CLI control underneath.
 
 ## Primary user
 
@@ -12,15 +13,30 @@ The first user is a technical KDE Plasma/Wayland user on CachyOS or another
 Arch-family distribution who:
 
 - runs AppImages, scripts, browser profiles, developer tools and local web apps;
+- moves repeatedly between repositories, notes, task runners, SSH destinations
+  and small text transformations;
 - values a polished interface but still wants CLI and inspectable files;
 - customises icons, categories, flags and working directories;
 - wants local ownership, backups and predictable rollback;
-- does not want a universal app store or a daemon watching the system.
+- does not want a universal app store, an opaque automation platform or a
+  marketplace downloading executable extensions.
 
 The architecture should welcome other Linux desktops later without weakening
 the KDE-first experience.
 
 ## Jobs to be done
+
+### Command Palette
+
+When I know the action I want but not which app, directory or syntax will get
+me there fastest, I want one keyboard-first palette that searches my local
+workstation, shows a rich preview and lets me execute or transform the result
+without losing context.
+
+The palette deliberately complements KRunner rather than copying its core job.
+Opening ordinary installed applications is baseline desktop behaviour;
+Blazelauncher's value is developer workflows, local knowledge, typed
+composition and visible execution details.
 
 ### Launcher Studio
 
@@ -59,21 +75,60 @@ without losing older working versions.
    CLI commands expose the same capability and optionally versioned JSON.
 6. **Calm density.** A compact power-user interface is welcome; avoid visual
    noise, modal chains and settings sprawl.
+7. **Fast and interruptible.** The palette should appear immediately in warm
+   mode, cancel stale searches and never freeze while providers work.
+8. **Private by default.** Queries and sensitive local sources remain on the
+   machine and are not recorded merely because they were searched.
 
 ## Information architecture
 
-- **Home** — recent launchers, cabinet health, update checks awaiting consent,
-  quick create/import actions.
+- **Command Palette overlay** — query, scoped provider chips, ranked results,
+  keyboard actions and a rich preview pane.
+- **Home** — recent actions, launchers, cabinet health and quick create/import
+  actions.
 - **Launchers** — search, filter, create, edit, clone, validate, test, export,
   back up and restore.
 - **AppImages** — cards/list view, versions, integration state, notes, launch
   flags, file health and deliberate update/rollback actions.
+- **Actions** — saved commands, script manifests, provider availability,
+  shortcuts and execution policy.
 - **Activity** — local audit trail of writes, integrations, updates and
   rollbacks with paths and results.
 - **Settings** — cabinet location, backup retention, update consent and
   desktop-specific adapters.
 
 ## MVP+ capabilities
+
+### Command Palette
+
+- keyboard-first overlay with fuzzy search, provider scoping and rich previews;
+- cancellable concurrent provider search with deterministic result ranking;
+- typed action inputs/outputs so text, paths, URLs and internal entities can be
+  passed to compatible transforms;
+- one-step composition for pure/read-only transforms, without becoming a
+  workflow/DAG builder;
+- exact command, working directory, environment differences and risk preview
+  before executing side-effecting actions;
+- optional user-enabled resident mode for fast toggling through local-only IPC;
+- exactly 15 built-in actions for the first complete palette milestone:
+
+  1. search files;
+  2. open recent projects;
+  3. open and act on Git repositories;
+  4. search Obsidian notes;
+  5. search browser history;
+  6. run saved commands;
+  7. trigger workstation sessions;
+  8. control media;
+  9. open SSH destinations;
+  10. run `just` tasks;
+  11. run `mise` tasks;
+  12. convert units;
+  13. generate UUIDs;
+  14. encode or decode text;
+  15. send clipboard text through transformations;
+- constrained TOML script-action manifests for explicit local commands; no
+  marketplace or downloaded extension catalogue.
 
 ### Launcher Studio
 
@@ -105,6 +160,15 @@ without losing older working versions.
 
 - A new script launcher can be created, validated and launched in under two
   minutes without editing a file.
+- In optional resident mode, the palette becomes visible within a target p95 of
+  150 ms on the reference CachyOS workstation; measurements must state hardware
+  and conditions rather than becoming an unsupported claim.
+- Cached/read-only providers return the first useful result within a target p95
+  of 300 ms on the reference workstation and cancel stale queries.
+- All 15 built-in actions have a useful empty state, preview, keyboard path,
+  error path and deterministic test fixture.
+- A text result can be passed through a compatible pure transformation without
+  creating a saved workflow.
 - An AppImage can be imported and visible in Plasma's menu in under one minute.
 - Every generated launcher passes internal validation; supported fixtures also
   pass `desktop-file-validate`.
@@ -116,6 +180,11 @@ without losing older working versions.
 ## Explicit non-goals
 
 - universal software discovery or an app store;
+- replacing KRunner's ordinary application launching;
+- an extension marketplace, remote manifest registry or automatic script
+  installation;
+- a general automation/workflow engine, background scheduler or arbitrary DAG
+  builder;
 - managing pacman, paru/AUR, Flatpak remotes or system packages;
 - privileged/system-wide installation in MVP+;
 - automatic background updates;
@@ -124,6 +193,18 @@ without losing older working versions.
 - a Plasma widget in MVP+ (the stable CLI/JSON surface is designed to enable
   one later);
 - cloud sync, accounts or telemetry.
+
+## Palette scope decisions
+
+- The first palette is a standalone Kirigami overlay, not a KRunner plugin.
+- Application launching may be offered later through a desktop adapter, but it
+  is not one of the 15 differentiating built-ins.
+- Script manifest v1 describes one explicit action. Scripts do not become
+  query providers and cannot inject arbitrary result lists into the palette.
+- Composition begins with one typed value passed to a compatible pure/read-only
+  transform. Side-effecting actions end the chain.
+- Browser, Obsidian, SSH and task sources are configured explicitly and read
+  through least-invasive adapters. Their contents are not query telemetry.
 
 ## Open product questions
 

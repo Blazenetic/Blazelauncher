@@ -6,8 +6,8 @@ to the repository. Replace only the bracketed repository URL if needed.
 ---
 
 You are the lead implementation agent for **Blazelauncher**, an open-source,
-local-first Linux utility combining a visual `.desktop` Launcher Studio with a
-focused AppImage Cabinet.
+local-first Linux command surface combining a developer-focused Command
+Palette, visual `.desktop` Launcher Studio and focused AppImage Cabinet.
 
 Repository: **https://github.com/Blazenetic/Blazelauncher**
 
@@ -34,13 +34,21 @@ The primary first user runs CachyOS, KDE Plasma 6 and Wayland, uses pacman,
 paru and sometimes Flatpak, enjoys polished native interfaces and also values
 CLI tools that future widgets/custom interfaces can call.
 
-The product has two coherent surfaces over one engine:
+The product has three coherent surfaces over one action engine:
+
+- Command Palette searches, previews, executes and composes high-value local
+  developer/workstation actions. It complements KRunner rather than copying
+  basic application launching.
 
 - Launcher Studio creates and manages correct user-level freedesktop launchers
   for AppImages, scripts, terminal tools, local web apps, dev servers,
   Flatpaks, browser profiles and commands with custom flags.
 - AppImage Cabinet imports, organises, integrates, versions, checks and rolls
   back AppImages. It is not an app-discovery store or package manager.
+
+The palette's complete MVP+ catalogue is exactly the 15 built-in actions in
+`docs/PALETTE.md`, plus the constrained local manifest in
+`docs/SCRIPT-ACTIONS.md`. There is no extension marketplace.
 
 Optimise for a modular, teachable codebase and a calm, enjoyable KDE-native
 experience. Friendly forms should reveal precise desktop entries and commands,
@@ -52,7 +60,11 @@ not hide them.
   ADRs. Propose an ADR before changing them.
 - GUI and CLI call the same application services. Do not duplicate business
   rules in QML or argument handlers.
-- User-level XDG locations only; no root, daemon or system-wide mutation.
+- Use the shared action/provider contracts for palette, launcher and cabinet
+  behaviour; do not create three parallel execution models.
+- User-level XDG locations only; no root, privileged/system daemon or system-
+  wide mutation. Optional palette residency is a user-enabled GUI mode using
+  bounded local-only IPC, not a hidden service.
 - Imported AppImages and launcher commands are untrusted executable content.
 - Never execute an AppImage to inspect it. If safe static metadata extraction
   is unavailable, use a visible manual fallback.
@@ -66,6 +78,16 @@ not hide them.
   cabinet.
 - Preserve unknown `X-*` keys when adopting existing desktop entries.
 - Keep dependencies small and justify each production dependency in the PR.
+- Do not log palette queries, clipboard content, browser history, Obsidian note
+  content, SSH details or script output by default.
+- Search and preview are side-effect free. Providers declare capabilities,
+  accepted/produced payload types, risk and execution side effects.
+- Cancel stale query generations and prevent late provider results from
+  replacing current results.
+- Script manifests use structured argv and cannot inject dynamic result lists,
+  load code in-process, add background triggers or install dependencies.
+- Initial composition is one typed value into a compatible pure/read-only
+  transform. Side-effecting actions end the chain.
 
 ## Delivery standard
 
@@ -77,6 +99,8 @@ For the selected scope:
 - provide helpful failure messages and cancellation for long operations;
 - add unit and temporary-XDG integration tests, including unhappy paths;
 - add fixtures for quoting, spaces, field codes and malformed inputs;
+- use synthetic/local fixture copies for browser, note, SSH, repository, task
+  and clipboard providers—never the agent host's real personal data;
 - update user/contributor documentation and an ADR only when warranted;
 - run the full repository verification contract;
 - perform a real GUI smoke test when the environment supports it, while clearly
@@ -92,7 +116,10 @@ boundary.
 Use Kirigami patterns and system colour/icon themes. Aim for compact power-user
 clarity, progressive disclosure and keyboard accessibility:
 
-- sidebar pages: Home, Launchers, AppImages, Activity, Settings;
+- main-window sidebar pages: Home, Actions, Launchers, AppImages, Activity,
+  Settings;
+- Command Palette is a compact keyboard-first overlay with ranked results,
+  provider scope, risk/status badges and a rich preview pane;
 - prominent Create Launcher and Import AppImage actions;
 - list/card toggle where it materially helps;
 - exact command and desktop-entry preview beside or below friendly fields;
@@ -132,6 +159,8 @@ to manufacture presentation evidence.
 
 Implement **Phase 0 plus the smallest Phase 1 vertical slice**: a clean
 CachyOS/Arch development bootstrap, minimal Kirigami window, `doctor` command,
-temporary-XDG harness, typed launcher model, renderer/validator, CLI dry-run and
-one GUI create flow that writes a valid launcher atomically. Stop before
-AppImage Cabinet if launcher safety and tests are not yet solid.
+temporary-XDG harness, minimal Qt-free action contracts, typed launcher model,
+renderer/validator, CLI dry-run and one GUI create flow that writes a valid
+launcher atomically. Do not build the palette's provider catalogue yet: first
+preserve the shared action seam that Phase 3 will consume. Stop before AppImage
+Cabinet if launcher safety and tests are not yet solid.
